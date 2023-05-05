@@ -42,15 +42,19 @@ describe("deposit", function () {
         const signers = await ethers.getSigners()
         const BatchTransfer = await ethers.getContractFactory("BatchTransfer");
         const batchTransfer = await BatchTransfer.attach(contractAddress);
-        let recipients = []
-        for (let i = 0; i < signers.length; i++) {
-            recipients.push(signers[i].address)
+        const recipientSize = 100
+        const loopCount = Math.ceil(signers.length / recipientSize)
+        for (let j = 0; j < loopCount; j++) {
+            let recipients = []
+            for (let i = j * recipientSize; i < (j + 1) * recipientSize; i++) {
+                recipients.push(signers[i].address)
+            }
+            const tx = await batchTransfer.transfer(recipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
+                {
+                    value: ethers.utils.parseEther((recipients.length * depositAmount).toString())
+                });
+            await tx.wait();
         }
-        const tx = await batchTransfer.transfer(recipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
-            {
-                value: ethers.utils.parseEther((recipients.length * depositAmount).toString())
-            });
-        await tx.wait();
     }).timeout(120000)
 })
 
@@ -121,12 +125,10 @@ describe("check accounts balance", function () {
 async function getAddressList(accountsNum, interval, mnemonic) {
     const hdNode = ethers.utils.HDNode.fromMnemonic(mnemonic)
     let addressList = []
-    if (accountsNum > interval) {
-        const loopCount = Math.floor(accountsNum / interval)
-        for (let i = 0; i < loopCount; i++) {
-            let hdNodeNew = hdNode.derivePath("m/44'/60'/0'/0/" + i * interval)
-            addressList.push(hdNodeNew.address)
-        }
+    const loopCount = Math.ceil(accountsNum / interval)
+    for (let i = 0; i < loopCount; i++) {
+        let hdNodeNew = hdNode.derivePath("m/44'/60'/0'/0/" + i * interval)
+        addressList.push(hdNodeNew.address)
     }
     return addressList
 }
