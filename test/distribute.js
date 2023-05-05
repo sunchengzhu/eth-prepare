@@ -32,11 +32,11 @@ describe("deposit", function () {
     it("deposit", async function () {
         console.log(`deposit from account${INITIALINDEX}`)
         let contractAddress
-        if (hre.network.name == "gw_testnet_v1") {
+        if (hre.network.name === "gw_testnet_v1") {
             contractAddress = "0x9e593da2fb96abf2bd5483e7fc417508df6ea40e"
-        } else if (hre.network.name == "gw_alphanet_v1") {
+        } else if (hre.network.name === "gw_alphanet_v1") {
             contractAddress = "0x3F83d35De751C6CaF49665235590F5f4C4Db97dD"
-        } else if (hre.network.name == "axon_devnet") {
+        } else if (hre.network.name === "axon_devnet") {
             contractAddress = "0x7C7087d81c5f4Bd7EA30A5e13095414395DfD4F1"
         }
         const signers = await ethers.getSigners()
@@ -55,6 +55,7 @@ describe("deposit", function () {
 })
 
 describe("withdraw", function () {
+    this.retries(2)
     it("withdraw", async function () {
         console.log(`withdraw from account${INITIALINDEX}`)
         const signers = await ethers.getSigners()
@@ -62,15 +63,16 @@ describe("withdraw", function () {
         const gasPrice = await getSufficientGasPrice(ethers.provider)
         const requestFnList = signers.map((signer) => () => ethers.provider.getBalance(signer.address))
         const reply = await concurrentRun(requestFnList, 20, "查询所有账户余额")
+        const requestFnList1 = signers.map((signer) => () => ethers.provider.getTransactionCount(signer.address))
+        const reply1 = await concurrentRun(requestFnList1, 20, "查询所有账户nonce")
         for (let i = 0; i < COUNT; i++) {
             let value = reply[i].sub(ethers.BigNumber.from(21000).mul(gasPrice)).toHexString().replaceAll("0x0", "0x")
             if (ethers.utils.formatEther(value) > 0) {
-                await transferWithoutNonce(signers[i].address, hdNode.address, gasPrice, value)
+                let nonce = ethers.BigNumber.from(reply1[i]).toHexString().replaceAll("0x0", "0x")
+                await transfer(signers[i].address, hdNode.address, gasPrice, value, nonce)
             }
         }
-        console.log("sleep 30s")
-        await sleep(30000)
-    }).timeout(360000)
+    }).timeout(240000)
 })
 
 describe("check accounts balance", function () {
@@ -105,7 +107,7 @@ describe("check accounts balance", function () {
         for (let i = 0; i < signers.length; i++) {
             let balance = ethers.utils.formatEther(reply[i])
             let value = reply[i].sub(ethers.BigNumber.from(21000).mul(gasPrice)).toHexString().replaceAll("0x0", "0x")
-            if (INITIALINDEX != 0 && ethers.utils.formatEther(value) > 0) {
+            if (INITIALINDEX !== 0 && ethers.utils.formatEther(value) > 0) {
                 console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth > ${ethers.utils.formatEther(ethers.BigNumber.from(21000).mul(gasPrice))} eth,nonce: ${reply1[i]}`)
             } else {
                 // console.log(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth,nonce: ${reply1[i]}`)
@@ -133,20 +135,21 @@ async function transferWithReceipt(from, to, gasPrice, value) {
     const tx = await ethers.provider.send("eth_sendTransaction", [{
         from,
         to,
-        "gas": "0xc738",
+        "gas": "0xc738", //51000
         "gasPrice": gasPrice,
         "value": value,
     }])
     await getTxReceipt(ethers.provider, tx, 100)
 }
 
-async function transferWithoutNonce(from, to, gasPrice, value) {
+async function transfer(from, to, gasPrice, value, nonce) {
     await ethers.provider.send("eth_sendTransaction", [{
         from,
         to,
         "gas": "0x5208", //21000
         "gasPrice": gasPrice,
-        "value": value
+        "value": value,
+        "nonce": nonce
     }])
 }
 
