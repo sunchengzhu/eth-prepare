@@ -7,8 +7,6 @@ const hre = require("hardhat");
 const accountsNum = parseInt(process.env.ACCOUNTSNUM)
 const depositAmount = parseFloat(process.env.DEPOSITAMOUNT)
 const interval = COUNT
-const hdNode = ethers.utils.HDNode.fromMnemonic(MNEMONIC).derivePath("m/44'/60'/0'/0/0")
-
 
 describe("recharge", async function () {
     it("recharge", async function () {
@@ -46,28 +44,22 @@ describe("deposit", function () {
         const batchTransfer = await BatchTransfer.attach(contractAddress);
         let recipients = []
         for (let i = 0; i < signers.length; i++) {
-            if (signers[i].address != hdNode.address) {
-                recipients.push(signers[i].address)
-            }
+            recipients.push(signers[i].address)
         }
         const tx = await batchTransfer.transfer(recipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
             {
                 value: ethers.utils.parseEther((recipients.length * depositAmount).toString())
             });
         await tx.wait();
-    }).timeout(600000)
+    }).timeout(120000)
 })
 
 describe("withdraw", function () {
-    let signers, gasPrice
-    before(async function () {
-        this.timeout(60000);
-        signers = await ethers.getSigners()
-        gasPrice = await getSufficientGasPrice(ethers.provider)
-    });
-
     it("withdraw", async function () {
         console.log(`withdraw from account${INITIALINDEX}`)
+        const signers = await ethers.getSigners()
+        const hdNode = ethers.utils.HDNode.fromMnemonic(MNEMONIC).derivePath("m/44'/60'/0'/0/0")
+        const gasPrice = await getSufficientGasPrice(ethers.provider)
         const requestFnList = signers.map((signer) => () => ethers.provider.getBalance(signer.address))
         const reply = await concurrentRun(requestFnList, 20, "查询所有账户余额")
         for (let i = 0; i < COUNT; i++) {
@@ -76,7 +68,9 @@ describe("withdraw", function () {
                 await transferWithoutNonce(signers[i].address, hdNode.address, gasPrice, value)
             }
         }
-    }).timeout(600000)
+        console.log("sleep 30s")
+        await sleep(30000)
+    }).timeout(360000)
 })
 
 describe("check accounts balance", function () {
@@ -112,7 +106,7 @@ describe("check accounts balance", function () {
             let balance = ethers.utils.formatEther(reply[i])
             let value = reply[i].sub(ethers.BigNumber.from(21000).mul(gasPrice)).toHexString().replaceAll("0x0", "0x")
             if (INITIALINDEX != 0 && ethers.utils.formatEther(value) > 0) {
-                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth > ${ethers.utils.formatEther(value)} eth,nonce: ${reply1[i]}`)
+                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth > ${ethers.utils.formatEther(ethers.BigNumber.from(21000).mul(gasPrice))} eth,nonce: ${reply1[i]}`)
             } else {
                 // console.log(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth,nonce: ${reply1[i]}`)
                 j++
