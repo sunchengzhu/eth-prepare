@@ -44,7 +44,7 @@ describe("deposit", function () {
         const recipients = signers.map((item) => {
             return item.address;
         })
-        await deposit(recipients,100)
+        await deposit(recipients, 100)
     }).timeout(120000)
 })
 
@@ -145,11 +145,13 @@ async function deposit(recipients, recipientSize) {
     for (let m = loopCount * recipientSize; m < loopCount * recipientSize + remainingNum; m++) {
         remainingRecipients.push(recipients[m])
     }
-    const tx = await batchTransfer.transfer(remainingRecipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
-        {
-            value: ethers.utils.parseEther((remainingNum * depositAmount).toString())
-        });
-    await tx.wait();
+    if (remainingRecipients.length > 0) {
+        const tx = await batchTransfer.transfer(remainingRecipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
+            {
+                value: ethers.utils.parseEther((remainingNum * depositAmount).toString())
+            });
+        await tx.wait();
+    }
 }
 
 async function getAddressList(accountsNum, interval, mnemonic) {
