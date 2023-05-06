@@ -6,7 +6,16 @@ const hre = require("hardhat");
 
 const accountsNum = parseInt(process.env.ACCOUNTSNUM)
 const depositAmount = parseFloat(process.env.DEPOSITAMOUNT)
+const minAmount = parseFloat(process.env.MINAMOUNT)
 const interval = COUNT
+let contractAddress
+if (hre.network.name === "gw_testnet_v1") {
+    contractAddress = "0x9e593da2fb96abf2bd5483e7fc417508df6ea40e"
+} else if (hre.network.name === "gw_alphanet_v1") {
+    contractAddress = "0x3F83d35De751C6CaF49665235590F5f4C4Db97dD"
+} else if (hre.network.name === "axon_devnet") {
+    contractAddress = "0x7C7087d81c5f4Bd7EA30A5e13095414395DfD4F1"
+}
 
 describe("recharge", async function () {
     it("recharge", async function () {
@@ -15,7 +24,7 @@ describe("recharge", async function () {
         const addressList = await getAddressList(accountsNum, interval, MNEMONIC)
         if (addressList.length > 1) {
             for (let i = 1; i < addressList.length; i++) {
-                const value = ethers.utils.parseUnits((depositAmount * COUNT * 1.2).toString(), "ether").toHexString().replaceAll("0x0", "0x")
+                const value = ethers.utils.parseUnits((depositAmount * COUNT * 10).toString(), "ether").toHexString().replaceAll("0x0", "0x")
                 await transferWithReceipt(signers[0].address, addressList[i], gasPrice, value)
                 const balance = await ethers.provider.getBalance(addressList[i])
                 const count = await ethers.provider.getTransactionCount(addressList[i])
@@ -25,36 +34,17 @@ describe("recharge", async function () {
         const balance = await ethers.provider.getBalance(addressList[0])
         const count = await ethers.provider.getTransactionCount(addressList[0])
         console.log(`account0 ${addressList[0]} balance: ${ethers.utils.formatEther(balance)} eth,nonce: ${count}`)
-    }).timeout(120000)
+    }).timeout(180000)
 })
 
 describe("deposit", function () {
     it("deposit", async function () {
         console.log(`deposit from account${INITIALINDEX}`)
-        let contractAddress
-        if (hre.network.name === "gw_testnet_v1") {
-            contractAddress = "0x9e593da2fb96abf2bd5483e7fc417508df6ea40e"
-        } else if (hre.network.name === "gw_alphanet_v1") {
-            contractAddress = "0x3F83d35De751C6CaF49665235590F5f4C4Db97dD"
-        } else if (hre.network.name === "axon_devnet") {
-            contractAddress = "0x7C7087d81c5f4Bd7EA30A5e13095414395DfD4F1"
-        }
         const signers = await ethers.getSigners()
-        const BatchTransfer = await ethers.getContractFactory("BatchTransfer");
-        const batchTransfer = await BatchTransfer.attach(contractAddress);
-        const recipientSize = 100
-        const loopCount = Math.ceil(signers.length / recipientSize)
-        for (let j = 0; j < loopCount; j++) {
-            let recipients = []
-            for (let i = j * recipientSize; i < (j + 1) * recipientSize; i++) {
-                recipients.push(signers[i].address)
-            }
-            const tx = await batchTransfer.transfer(recipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
-                {
-                    value: ethers.utils.parseEther((recipients.length * depositAmount).toString())
-                });
-            await tx.wait();
-        }
+        const recipients = signers.map((item) => {
+            return item.address;
+        })
+        await deposit(recipients,100)
     }).timeout(120000)
 })
 
@@ -80,7 +70,7 @@ describe("withdraw", function () {
 })
 
 describe("check accounts balance", function () {
-    let signers, gasPrice, reply, reply1
+    let signers, gasPrice, reply
     before(async function () {
         this.timeout(120000);
         console.log(`check from account${INITIALINDEX}`)
@@ -89,6 +79,21 @@ describe("check accounts balance", function () {
         const requestFnList = signers.map((signer) => () => ethers.provider.getBalance(signer.address))
         reply = await concurrentRun(requestFnList, 20, "查询所有账户余额");
     });
+
+    it("checkAndDeposit", async function () {
+        let recipients = []
+        for (let i = 0; i < signers.length; i++) {
+            let balance = ethers.utils.formatEther(reply[i])
+            if (balance < minAmount) {
+                console.error(`account${i + INITIALINDEX} ${signers[i].address} has insufficient balance: ${balance} eth < ${minAmount} eth`)
+                recipients.push(signers[i].address)
+            }
+        }
+        console.log(`${recipients.length} accounts with insufficient balance`)
+        if (recipients.length > 0) {
+            await deposit(recipients, 100)
+        }
+    }).timeout(120000)
 
     it("afterDeposit", async function () {
         let j = 0
@@ -119,6 +124,33 @@ describe("check accounts balance", function () {
         expect(j).to.be.equal(COUNT)
     }).timeout(60000)
 })
+
+async function deposit(recipients, recipientSize) {
+    const BatchTransfer = await ethers.getContractFactory("BatchTransfer");
+    const batchTransfer = await BatchTransfer.attach(contractAddress);
+    const loopCount = Math.floor(recipients.length / recipientSize)
+    for (let j = 0; j < loopCount; j++) {
+        let tmpRecipients = []
+        for (let k = j * recipientSize; k < (j + 1) * recipientSize; k++) {
+            tmpRecipients.push(recipients[k])
+        }
+        const tx = await batchTransfer.transfer(tmpRecipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
+            {
+                value: ethers.utils.parseEther((recipientSize * depositAmount).toString())
+            });
+        await tx.wait();
+    }
+    const remainingNum = recipients.length % recipientSize
+    const remainingRecipients = []
+    for (let m = loopCount * recipientSize; m < loopCount * recipientSize + remainingNum; m++) {
+        remainingRecipients.push(recipients[m])
+    }
+    const tx = await batchTransfer.transfer(remainingRecipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
+        {
+            value: ethers.utils.parseEther((remainingNum * depositAmount).toString())
+        });
+    await tx.wait();
+}
 
 async function getAddressList(accountsNum, interval, mnemonic) {
     const hdNode = ethers.utils.HDNode.fromMnemonic(mnemonic)
@@ -201,8 +233,7 @@ async function concurrentRun(fnList = [], max = 5, taskName = "未命名") {
             const fn = fnList[index];
             if (!fn) return resolve();
             // 执行当前异步任务
-            const reply = await fn();
-            replyList[index] = reply;
+            replyList[index] = await fn();
             // console.log(`${taskName} 事务进度 ${((++current / count) * 100).toFixed(2)}% `);
             // 执行完当前任务后，继续执行任务池的剩余任务
             await schedule(index + max);

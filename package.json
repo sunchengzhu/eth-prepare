@@ -1,5 +1,5 @@
 {
-  "name": "learnHardhat",
+  "name": "distribute_eth",
   "scripts": {
     "addRpcLog": "patch-package"
   },
