@@ -88,8 +88,6 @@ describe("check accounts balance", function () {
         gasPrice = await getSufficientGasPrice(ethers.provider)
         const requestFnList = signers.map((signer) => () => ethers.provider.getBalance(signer.address))
         reply = await concurrentRun(requestFnList, 20, "查询所有账户余额");
-        const requestFnList1 = signers.map((signer) => () => ethers.provider.getTransactionCount(signer.address))
-        reply1 = await concurrentRun(requestFnList1, 20, "查询所有账户nonce")
     });
 
     it("afterDeposit", async function () {
@@ -97,9 +95,9 @@ describe("check accounts balance", function () {
         for (let i = 0; i < signers.length; i++) {
             let balance = ethers.utils.formatEther(reply[i])
             if (balance < depositAmount) {
-                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth < ${depositAmount} eth,nonce: ${reply1[i]}`)
+                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth < ${depositAmount} eth`)
             } else {
-                // console.log(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth,nonce: ${reply1[i]}`)
+                // console.log(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth}`)
                 j++
             }
         }
@@ -112,9 +110,9 @@ describe("check accounts balance", function () {
             let balance = ethers.utils.formatEther(reply[i])
             let value = reply[i].sub(ethers.BigNumber.from(21000).mul(gasPrice)).toHexString().replaceAll("0x0", "0x")
             if (INITIALINDEX !== 0 && ethers.utils.formatEther(value) > 0) {
-                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth > ${ethers.utils.formatEther(ethers.BigNumber.from(21000).mul(gasPrice))} eth,nonce: ${reply1[i]}`)
+                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth > ${ethers.utils.formatEther(ethers.BigNumber.from(21000).mul(gasPrice))} eth`)
             } else {
-                // console.log(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth,nonce: ${reply1[i]}`)
+                // console.log(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth`)
                 j++
             }
         }
