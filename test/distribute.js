@@ -24,11 +24,17 @@ describe("recharge", async function () {
         const addressList = await getAddressList(accountsNum, interval, MNEMONIC)
         if (addressList.length > 1) {
             for (let i = 1; i < addressList.length; i++) {
-                const value = ethers.utils.parseUnits((depositAmount * COUNT * 10).toString(), "ether").toHexString().replaceAll("0x0", "0x")
-                await transferWithReceipt(signers[0].address, addressList[i], gasPrice, value)
+                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 10).toString(), "ether")
                 const balance = await ethers.provider.getBalance(addressList[i])
                 const count = await ethers.provider.getTransactionCount(addressList[i])
-                console.log(`account${i * interval} ${addressList[i]} balance: ${ethers.utils.formatEther(balance)} eth,nonce: ${count}`)
+                if (ethValue.sub(balance).lte(0)) {
+                    console.log(`account${i * interval} ${addressList[i]} has sufficient balance: ${ethers.utils.formatEther(balance)} eth >= ${ethers.utils.formatEther(ethValue)} eth,nonce: ${count}`)
+                } else {
+                    let value = ethValue.sub(balance).toHexString().replaceAll("0x0", "0x")
+                    await transferWithReceipt(signers[0].address, addressList[i], gasPrice, value)
+                    const newBalance = await ethers.provider.getBalance(addressList[i])
+                    console.log(`account${i * interval} ${addressList[i]} balance: ${ethers.utils.formatEther(newBalance)} eth,nonce: ${count}`)
+                }
             }
         }
         const balance = await ethers.provider.getBalance(addressList[0])
