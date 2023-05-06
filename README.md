@@ -25,7 +25,7 @@ npx hardhat test --grep "recharge" --network $NETWORK
 
 ### 多进程分发ETH并检查
 
-1. 第一批账户在中通过批量转账合约BatchTransfer.sol向其他账户转入`DEPOSITAMOUNT`个ETH
+1. 第一批账户在中通过批量转账合约BatchTransfer.sol向其他`COUNT`个账户转入`DEPOSITAMOUNT`个ETH
 
 ```shell
 bash run.sh deposit $NETWORK
@@ -66,3 +66,5 @@ npm run addRpcLog
 #若需要关闭rpc日志功能，则执行以下命令
 rm -rf node_modules/hardhat && npm install hardhat && chmod +x node_modules/.bin/hardhat
 ```
+### 调整进程数
+可以修改run.sh中的`processNum`调整进程数
