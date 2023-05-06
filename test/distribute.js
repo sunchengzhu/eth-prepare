@@ -76,9 +76,10 @@ describe("withdraw", function () {
 })
 
 describe("check accounts balance", function () {
+    this.retries(2)
     let signers, gasPrice, reply
     before(async function () {
-        this.timeout(120000);
+        this.timeout(60000);
         console.log(`check from account${INITIALINDEX}`)
         signers = await ethers.getSigners()
         gasPrice = await getSufficientGasPrice(ethers.provider)
@@ -113,7 +114,7 @@ describe("check accounts balance", function () {
             }
         }
         expect(j).to.be.equal(COUNT)
-    }).timeout(60000)
+    }).timeout(30000)
 
     it("afterWithdraw", async function () {
         let j = 0
@@ -128,7 +129,7 @@ describe("check accounts balance", function () {
             }
         }
         expect(j).to.be.equal(COUNT)
-    }).timeout(60000)
+    }).timeout(30000)
 })
 
 async function deposit(recipients, recipientSize) {

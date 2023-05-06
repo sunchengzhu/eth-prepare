@@ -2,19 +2,27 @@
 CASE=$1
 NETWORK=$2
 
-if [ ! -n "$CASE" ]; then
+if [ -z "$CASE" ]; then
   CASE="afterDeposit"
 fi
-if [ ! -n "$NETWORK" ]; then
+if [ -z "$NETWORK" ]; then
   NETWORK="gw_testnet_v1"
 fi
+processNum=4
 
-if [ $CASE = "deposit" ]; then
-  npx hardhat test --grep "recharge" --network $NETWORK
+ACCOUNTSNUMstr=$(cat .env | grep ACCOUNTSNUM)
+ACCOUNTSNUM=${ACCOUNTSNUMstr#*ACCOUNTSNUM=}
+COUNTstr=$(cat .env | grep COUNT=)
+COUNT=${COUNTstr#*COUNT=}
+taskNum=$(expr $ACCOUNTSNUM / $COUNT)
+loopCount=$(expr $taskNum / $processNum)
+for ((j = 0; j < $loopCount; j++)); do
+  index=$(expr $j \* $processNum)
+  node run.js $processNum "$index" $CASE $NETWORK
+done
+
+remainingNum=$(expr $taskNum % $processNum)
+if [ $remainingNum -gt 0 ]; then
+  remainingIndex=$(expr $loopCount \* $processNum)
+  node run.js $remainingNum "$remainingIndex" $CASE $NETWORK
 fi
-
-node run.js 4 0 $CASE $NETWORK
-node run.js 4 4 $CASE $NETWORK
-node run.js 4 8 $CASE $NETWORK
-node run.js 4 12 $CASE $NETWORK
-node run.js 4 16 $CASE $NETWORK
