@@ -25,7 +25,7 @@ npx hardhat test --grep "recharge" --network $NETWORK
 
 ### 多进程分发ETH并检查
 
-1. 第一批账户在中通过批量转账合约BatchTransfer.sol向其他`COUNT`个账户转入`DEPOSITAMOUNT`个ETH
+1. 第一批账户通过批量转账合约BatchTransfer.sol向其他`COUNT`个账户转入`DEPOSITAMOUNT`个ETH
 
 ```shell
 bash run.sh deposit $NETWORK
