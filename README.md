@@ -12,8 +12,8 @@
 MNEMONIC='test test test test test test test test test test test junk'
 COUNT=500
 ACCOUNTSNUM=10000
-DEPOSITAMOUNT=0.1
-MINAMOUNT=0.05
+DEPOSITAMOUNT=0.2
+MINAMOUNT=0.01
 ```
 
 2. 给第一批账户转入足额ETH
