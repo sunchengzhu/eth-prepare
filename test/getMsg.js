@@ -7,8 +7,10 @@ describe("get msg", function () {
     it("get block msg", async () => {
         const blockNumber = await ethers.provider.getBlockNumber()
         const gasPrice = await getGasPrice(ethers.provider)
+        const chainId = (await ethers.provider.getNetwork()).chainId
         console.log(`latest block number: ${blockNumber}`)
         console.log(`gas price: ${gasPrice} wei`)
+        console.log(`chain id: ${chainId}`)
     }).timeout(30000)
 
     it("get accounts msg", async () => {
