@@ -1,5 +1,4 @@
 const {ethers} = require("hardhat");
-
 const {MNEMONIC, INITIALINDEX} = require("../hardhat.config");
 const {concurrentRun, getTxReceipt} = require("./distribute");
 

@@ -1,7 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('dotenv').config()
 
-const MNEMONIC = process.env.MNEMONIC === undefined ? "test test test test test test test test test test test junk" : parseInt(process.env.MNEMONIC)
+const MNEMONIC = process.env.MNEMONIC === undefined ? "test test test test test test test test test test test junk" : process.env.MNEMONIC
 const COUNT = process.env.COUNT === undefined ? 20 : parseInt(process.env.COUNT)
 const INITIALINDEX = process.env.INITIALINDEX === undefined ? 0 : parseInt(process.env.INITIALINDEX)
 
