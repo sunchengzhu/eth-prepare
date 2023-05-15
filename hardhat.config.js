@@ -1,15 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('dotenv').config()
 
-//default mnemonic: test test test test test test test test test test test junk
-const MNEMONIC = process.env.MNEMONIC;
-const COUNT = parseInt(process.env.COUNT);
-let INITIALINDEX;
-if (process.env.INITIALINDEX === undefined) {
-    INITIALINDEX = 0
-} else {
-    INITIALINDEX = parseInt(process.env.INITIALINDEX);
-}
+const MNEMONIC = process.env.MNEMONIC === undefined ? "test test test test test test test test test test test junk" : parseInt(process.env.MNEMONIC)
+const COUNT = process.env.COUNT === undefined ? 20 : parseInt(process.env.COUNT)
+const INITIALINDEX = process.env.INITIALINDEX === undefined ? 0 : parseInt(process.env.INITIALINDEX)
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -33,6 +27,14 @@ module.exports = {
         },
         axon_devnet: {
             url: "http://34.216.103.183:8000",
+            accounts: {
+                mnemonic: MNEMONIC,
+                initialIndex: INITIALINDEX,
+                count: COUNT
+            }
+        },
+        axon_perf: {
+            url: "http://13.237.199.246:8000",
             accounts: {
                 mnemonic: MNEMONIC,
                 initialIndex: INITIALINDEX,
