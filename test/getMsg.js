@@ -11,6 +11,10 @@ describe("get msg", function () {
         console.log(`latest block number: ${blockNumber}`)
         console.log(`gas price: ${gasPrice} wei`)
         console.log(`chain id: ${chainId}`)
+        const bkMap = await getTxCount(ethers.provider, blockNumber, 10)
+        bkMap.forEach(function (value, key) {
+            console.log(`block ${key} tx count: ${value}`)
+        });
     }).timeout(30000)
 
     it("get accounts msg", async () => {
@@ -32,7 +36,7 @@ describe("get msg", function () {
     }).timeout(30000)
 
     it("get receipt by txHash", async () => {
-        const txHash = "0x72c0657902c37defc17c395e3e9cbbcd66fe8c9a04248f7b589efcd39d6290f0"
+        const txHash = "0xcc92d61f7186a84eccce909374ac13c16dbe609bd70c2c62e4e4142c477c3027"
         const txReceipt = await getTxReceipt(ethers.provider, txHash, 100)
         console.log(txReceipt)
     }).timeout(30000)
@@ -57,4 +61,15 @@ describe("get msg", function () {
 async function getGasPrice(provider) {
     const gasPrice = await provider.getGasPrice()
     return parseInt(gasPrice.toHexString().replaceAll("0x0", "0x"), 16)
+}
+
+async function getTxCount(provider, blockNumber, blockCount) {
+    const map = new Map();
+    for (let i = 0; i < blockCount; i++) {
+        let txCount = await ethers.provider.send("eth_getBlockTransactionCountByNumber", [
+            "0x" + (blockNumber - i).toString(16)
+        ])
+        map.set((blockNumber - i), parseInt(txCount, 16));
+    }
+    return map;
 }
