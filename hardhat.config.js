@@ -40,6 +40,14 @@ module.exports = {
                 initialIndex: INITIALINDEX,
                 count: COUNT
             }
+        },
+        sepolia: {
+            url: "https://eth-sepolia.g.alchemy.com/v2/jBG_4O1H5CHQugJjwBt_md0ks3FQpsqN",
+            accounts: {
+                mnemonic: MNEMONIC,
+                initialIndex: INITIALINDEX,
+                count: COUNT
+            }
         }
     },
     solidity: {

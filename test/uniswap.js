@@ -1,10 +1,11 @@
 const {ethers} = require("hardhat");
 const {execSync} = require('child_process');
 const fs = require("fs");
+const {MNEMONIC} = require("../hardhat.config");
 
 describe('uniswap', function () {
     this.timeout(100000)
-    it('deploySwap', async () => {
+    it('deployAndSwap', async () => {
         let deployInfo = {
             wethAddress: "",
             otherTokenAddress: "",
@@ -61,14 +62,25 @@ describe('uniswap', function () {
             1,
             1,
             uniswapV2Router02Contract.signer.address,
-            99999999999999n, {
-                value: 1000000000
-            }
+            99999999999999n,
+            {value: 1000000000}
         );
         await rt.wait();
 
         // print
         console.log("==== deploy ======")
         console.log(deployInfo)
+
+        //swapExactETHForTokens
+        const hdNode = ethers.utils.HDNode.fromMnemonic(MNEMONIC).derivePath("m/44'/60'/0'/0/0")
+        const swapTx = await uniswapV2Router02Contract.swapExactETHForTokens(
+            1,
+            [deployInfo.wethAddress, deployInfo.otherTokenAddress],
+            hdNode.address,
+            99999999999999n,
+            {value: 1000}
+        )
+        await swapTx.wait()
+        console.log(`data: ${swapTx.data}`)
     })
 });
