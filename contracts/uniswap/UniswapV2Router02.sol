@@ -710,7 +710,6 @@ library UniswapV2Library {
             ))));
         //0xe9f63ea43e2b3cc65d4f7fea9fc891d2af900d8fa53077ad43e3650a8719f69b
         //0xf2b41eb0187328b7ce6b23f7741ae3640640abe01ebf68f883b0a7afb75b5e72
-        //0xe9f63ea43e2b3cc65d4f7fea9fc891d2af900d8fa53077ad43e3650a8719f69b
     }
 
     // fetches and sorts the reserves for a pair
