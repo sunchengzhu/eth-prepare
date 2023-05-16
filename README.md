@@ -6,7 +6,19 @@
 
 ### 前置步骤
 
-1. 在项目根目录下新建.env文件，配置环境变量，可以参考如下配置：
+1. 安装依赖包
+
+```shell
+npm install
+```
+
+2. 编译合约
+
+```shell
+npx hardhat compile
+```
+
+3. 在项目根目录下新建.env文件，配置环境变量，可以参考如下配置：
 
 ```dotenv
 MNEMONIC='test test test test test test test test test test test junk'
@@ -16,7 +28,7 @@ DEPOSITAMOUNT=0.2
 MINAMOUNT=0.01
 ```
 
-2. 给第一批账户转入足额ETH
+4. 给第一批账户转入足额ETH
 
 ```shell
 #指定$NETWORK，如gw_alphanet_v1
