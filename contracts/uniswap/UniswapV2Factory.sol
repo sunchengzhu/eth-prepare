@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2020-05-04
-*/
-
 pragma solidity =0.5.16;
 
 interface IUniswapV2Factory {
