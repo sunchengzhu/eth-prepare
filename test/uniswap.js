@@ -1,7 +1,6 @@
 const {ethers} = require("hardhat");
 const {execSync} = require('child_process');
 const fs = require("fs");
-const {MNEMONIC} = require("../hardhat.config");
 
 describe('uniswap', function () {
     this.timeout(100000)
