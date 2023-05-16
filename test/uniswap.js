@@ -72,11 +72,10 @@ describe('uniswap', function () {
         console.log(deployInfo)
 
         //swapExactETHForTokens
-        const hdNode = ethers.utils.HDNode.fromMnemonic(MNEMONIC).derivePath("m/44'/60'/0'/0/0")
         const swapTx = await uniswapV2Router02Contract.swapExactETHForTokens(
             1,
             [deployInfo.wethAddress, deployInfo.otherTokenAddress],
-            hdNode.address,
+            uniswapV2Router02Contract.signer.address,
             99999999999999n,
             {value: 1000}
         )
