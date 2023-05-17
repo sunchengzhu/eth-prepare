@@ -31,7 +31,8 @@ module.exports = {
                 mnemonic: MNEMONIC,
                 initialIndex: INITIALINDEX,
                 count: COUNT
-            }
+            },
+            gas: 10000000
         },
         axon_perf: {
             url: "http://13.237.199.246:8000",
