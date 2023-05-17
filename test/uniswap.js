@@ -18,7 +18,7 @@ describe('uniswap', function () {
         deployInfo.wethAddress = (await wethContract.deployed()).address
 
         // deploy factory contract
-        console.log('deploy factory contract ')
+        console.log('deploy factory contract')
         const factoryContractInfo = await ethers.getContractFactory("UniswapV2Factory");
         const factoryContract = await factoryContractInfo.deploy(deployInfo.wethAddress);
         await factoryContract.deployed()
@@ -26,7 +26,7 @@ describe('uniswap', function () {
         console.log('deployInfo.factoryAddress :', deployInfo.factoryAddress)
 
         // deploy swap contract
-        console.log('deploy swap ')
+        console.log('deploy swap')
         deployInfo.pairHash = await factoryContract.getPairCodeHash()
         console.log("deployInfo.pairHash:", deployInfo.pairHash)
         const pairHash = deployInfo.pairHash.replace("0x", "")
@@ -53,7 +53,7 @@ describe('uniswap', function () {
         const tx = await usdtContract.approve(uniswapV2Router02Contract.address, 1000000000000000000000n)
         await tx.wait()
 
-        console.log('addliquity ')
+        console.log('addliquity')
         // addliquity
         let rt = await uniswapV2Router02Contract.addLiquidityETH(
             usdtContract.address,
