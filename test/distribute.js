@@ -14,7 +14,7 @@ if (hre.network.name === "gw_testnet_v1") {
 } else if (hre.network.name === "gw_alphanet_v1") {
     contractAddress = "0x3F83d35De751C6CaF49665235590F5f4C4Db97dD"
 } else if (hre.network.name === "axon_devnet") {
-    contractAddress = "0x7C7087d81c5f4Bd7EA30A5e13095414395DfD4F1"
+    contractAddress = "0xA6465996d9b1C6E82a65d4503D07eE1F68ED3a34"
 } else if (hre.network.name === "axon_perf") {
     contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 }
