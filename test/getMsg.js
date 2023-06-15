@@ -49,9 +49,9 @@ describe("get msg", function () {
     it("get private key by mnemonic", async () => {
         const numWallet = 20
         const hdNode = ethers.utils.HDNode.fromMnemonic(MNEMONIC)
-        let basePath = "m/44'/60'/0'/0";
+        let basePath = "m/44'/60'/0'/0/";
         for (let i = 0; i < numWallet; i++) {
-            let hdNodeNew = hdNode.derivePath(basePath + "/" + i);
+            let hdNodeNew = hdNode.derivePath(basePath + i);
             console.log(`account${i} ${hdNodeNew.address} privateKey: ${hdNodeNew.privateKey}`)
         }
     }).timeout(30000)

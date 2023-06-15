@@ -8,7 +8,7 @@ for (let i = (0 + fromIndex); i < (processNum + fromIndex); i++) {
         {
             env: {
                 ...process.env,
-                INITIALINDEX: `${i * process.env.COUNT}`,
+                INITIALINDEX: `${Number(process.env.INITIALINDEX) + i * Number(process.env.COUNT)}`,
                 FORCE_COLOR: true
             }
         });

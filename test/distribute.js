@@ -28,12 +28,12 @@ describe("recharge", async function () {
                 const balance = await ethers.provider.getBalance(addressList[i])
                 const count = await ethers.provider.getTransactionCount(addressList[i])
                 if (ethValue.sub(balance).lte(0)) {
-                    console.log(`account${i * interval} ${addressList[i]} has sufficient balance: ${ethers.utils.formatEther(balance)} eth >= ${ethers.utils.formatEther(ethValue)} eth,nonce: ${count}`)
+                    console.log(`account${i * interval + Number(process.env.INITIALINDEX)} ${addressList[i]} has sufficient balance: ${ethers.utils.formatEther(balance)} eth >= ${ethers.utils.formatEther(ethValue)} eth,nonce: ${count}`)
                 } else {
                     let value = ethValue.sub(balance).toHexString().replaceAll("0x0", "0x")
                     await transferWithReceipt(signers[0].address, addressList[i], gasPrice, value)
                     const newBalance = await ethers.provider.getBalance(addressList[i])
-                    console.log(`account${i * interval} ${addressList[i]} balance: ${ethers.utils.formatEther(newBalance)} eth,nonce: ${count}`)
+                    console.log(`account${i * interval + Number(process.env.INITIALINDEX)} ${addressList[i]} balance: ${ethers.utils.formatEther(newBalance)} eth,nonce: ${count}`)
                 }
             }
         }
@@ -166,7 +166,8 @@ async function getAddressList(accountsNum, interval, mnemonic) {
     let addressList = []
     const loopCount = Math.ceil(accountsNum / interval)
     for (let i = 0; i < loopCount; i++) {
-        let hdNodeNew = hdNode.derivePath("m/44'/60'/0'/0/" + i * interval)
+        let sum = i * interval + Number(process.env.INITIALINDEX)
+        let hdNodeNew = hdNode.derivePath("m/44'/60'/0'/0/" + sum)
         addressList.push(hdNodeNew.address)
     }
     return addressList
