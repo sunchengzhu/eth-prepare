@@ -7,7 +7,7 @@ const INITIALINDEX = process.env.INITIALINDEX === undefined ? 0 : parseInt(proce
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-    defaultNetwork: "gw_testnet_v1",
+    defaultNetwork: "axon_devnet",
     networks: {
         gw_testnet_v1: {
             url: "https://v1.testnet.godwoken.io/rpc/instant-finality-hack",
@@ -33,14 +33,6 @@ module.exports = {
                 count: COUNT
             },
             gas: 10000000
-        },
-        axon_perf: {
-            url: "http://13.237.199.246:8000",
-            accounts: {
-                mnemonic: MNEMONIC,
-                initialIndex: INITIALINDEX,
-                count: COUNT
-            }
         },
         sepolia: {
             url: "https://eth-sepolia.g.alchemy.com/v2/jBG_4O1H5CHQugJjwBt_md0ks3FQpsqN",
