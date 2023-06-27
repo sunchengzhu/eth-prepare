@@ -10,10 +10,10 @@ describe("get msg", function () {
         console.log(`latest block number: ${blockNumber}`)
         console.log(`gas price: ${gasPrice} wei`)
         console.log(`chain id: ${chainId}`)
-        const bkMap = await getTxCount(ethers.provider, blockNumber, 10)
-        bkMap.forEach(function (value, key) {
-            console.log(`block ${key} tx count: ${value}`)
-        });
+        // const bkMap = await getTxCount(ethers.provider, blockNumber, 10)
+        // bkMap.forEach(function (value, key) {
+        //     console.log(`block ${key} tx count: ${value}`)
+        // });
     }).timeout(30000)
 
     it("get accounts msg", async () => {
