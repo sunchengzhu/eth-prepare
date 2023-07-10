@@ -24,7 +24,7 @@ describe("recharge", async function () {
         const addressList = await getAddressList(accountsNum, interval, MNEMONIC)
         if (addressList.length > 1) {
             for (let i = 1; i < addressList.length; i++) {
-                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 10).toString(), "ether")
+                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 2).toString(), "ether")
                 const balance = await ethers.provider.getBalance(addressList[i])
                 const count = await ethers.provider.getTransactionCount(addressList[i])
                 if (ethValue.sub(balance).lte(0)) {
