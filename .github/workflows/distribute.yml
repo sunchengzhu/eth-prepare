@@ -42,6 +42,7 @@ jobs:
           echo "COUNT=500" >> .env
           echo "ACCOUNTSNUM=${{ env.ACCOUNT_SUM }}" >> .env
           echo "DEPOSITAMOUNT=${{ env.DEPOSIT_AMOUNT }}" >> .env
+          cat .env
 
       - name: Install dependencies
         run: npm install
