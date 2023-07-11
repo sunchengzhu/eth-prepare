@@ -8,9 +8,9 @@ on:
         description: Environment
         required: true
         options:
-          - alphanet
-          - testnet
-          - axon
+          - gw_alphanet_v1
+          - gw_testnet_v1
+          - axon_devnet
       accountAmount:
         description: 'Account Amount'
         required: false
@@ -42,7 +42,7 @@ jobs:
           node-version: 14
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Recharge
         run: npx hardhat test --grep "recharge" --network $NETWORK
