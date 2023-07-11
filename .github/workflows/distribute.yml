@@ -14,7 +14,7 @@ on:
       mnemonic:
         description: 'Mnemonic'
         required: true
-        default: 'test test test test test test test test test test test junk"'
+        default: 'test test test test test test test test test test test junk'
       accountsNum:
         description: 'Accounts Number'
         required: true
