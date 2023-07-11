@@ -15,8 +15,8 @@ on:
         description: 'Mnemonic'
         required: true
         default: 'test test test test test test test test test test test junk"'
-      accountSum:
-        description: 'Account Sum'
+      accountsNum:
+        description: 'Accounts Number'
         required: true
         default: '10000'
       depositAmount:
@@ -30,7 +30,7 @@ jobs:
     env:
       NETWORK: ${{ github.event.inputs.network }}
       MNEMONIC: ${{ github.event.inputs.mnemonic }}
-      ACCOUNT_SUM: ${{ github.event.inputs.accountSum }}
+      ACCOUNTS_NUM: ${{ github.event.inputs.accountsNum }}
       DEPOSIT_AMOUNT: ${{ github.event.inputs.depositAmount }}
     steps:
       - name: Checkout
@@ -45,8 +45,9 @@ jobs:
         run: |
           echo "MNEMONIC=${{ env.MNEMONIC }}" >> .env
           echo "COUNT=500" >> .env
-          echo "ACCOUNTSNUM=${{ env.ACCOUNT_SUM }}" >> .env
+          echo "ACCOUNTSNUM=${{ env.ACCOUNTS_NUM }}" >> .env
           echo "DEPOSITAMOUNT=${{ env.DEPOSIT_AMOUNT }}" >> .env
+          cat .env
 
       - name: Install dependencies
         run: npm install
