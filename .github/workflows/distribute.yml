@@ -19,19 +19,14 @@ on:
         description: 'Deposit Amount'
         required: true
         default: '2'
-      minAmount:
-        description: 'Minimum Amount'
-        required: true
-        default: '0.1'
 
 jobs:
   distribute:
     runs-on: ubuntu-latest
     env:
       NETWORK: ${{ github.event.inputs.network }}
-      ACCOUNT_AMOUNT: ${{ github.event.inputs.accountAmount }}
-      DEPOSIT_AMOUNT: ${{ github.event.inputs.depositAmount }}
-      MIN_AMOUNT: ${{ github.event.inputs.minAmount }}
+      ACCOUNTSNUM: ${{ github.event.inputs.accountSum }}
+      DEPOSITAMOUNT: ${{ github.event.inputs.depositAmount }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -48,7 +43,7 @@ jobs:
         run: npx hardhat test --grep "recharge" --network $NETWORK
 
       - name: Deposit
-        run: bash run.sh deposit $NETWORK $DEPOSIT_AMOUNT
+        run: bash run.sh deposit $NETWORK
 
       - name: AfterDeposit
-        run: bash run.sh afterDeposit $NETWORK $MIN_AMOUNT
+        run: bash run.sh afterDeposit $NETWORK
