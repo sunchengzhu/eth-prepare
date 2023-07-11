@@ -49,9 +49,12 @@ bash run.sh deposit $NETWORK
 bash run.sh afterDeposit $NETWORK
 ```
 
-### GitHub Actions上配置定时检查并转账ETH
+3. 定时检查并转账ETH
 
-设置每日执行`checkAndDeposit`，保证所有账户的余额大于`MINAMOUNT`个ETH
+这批账户用了一段时间后执行`checkAndDeposit`，保证所有账户的余额大于`MINAMOUNT`个ETH
+```shell
+bash run.sh checkAndDeposit $NETWORK
+```
 
 ## 其他
 
