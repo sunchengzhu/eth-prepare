@@ -11,9 +11,9 @@ on:
           - gw_alphanet_v1
           - gw_testnet_v1
           - axon_devnet
-      accountAmount:
-        description: 'Account Amount'
-        required: false
+      accountSum:
+        description: 'Account Sum'
+        required: true
         default: '10000'
       depositAmount:
         description: 'Deposit Amount'
@@ -25,8 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NETWORK: ${{ github.event.inputs.network }}
-      ACCOUNTSNUM: ${{ github.event.inputs.accountSum }}
-      DEPOSITAMOUNT: ${{ github.event.inputs.depositAmount }}
+      ACCOUNT_SUM: ${{ github.event.inputs.accountSum }}
+      DEPOSIT_AMOUNT: ${{ github.event.inputs.depositAmount }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -35,6 +35,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18
+
+      - name: Append to .env
+        run: |
+          echo "MNEMONIC=${{ secrets.MNEMONIC }}" >> .env
+          echo "COUNT=500" >> .env
+          echo "ACCOUNTSNUM=${{ env.ACCOUNT_SUM }}" >> .env
+          echo "DEPOSITAMOUNT=${{ env.DEPOSIT_AMOUNT }}" >> .env
 
       - name: Install dependencies
         run: npm install
