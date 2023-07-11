@@ -24,7 +24,7 @@ describe("recharge", async function () {
         const addressList = await getAddressList(accountsNum, interval, MNEMONIC)
         if (addressList.length > 1) {
             for (let i = 1; i < addressList.length; i++) {
-                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 2).toString(), "ether")
+                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 3).toString(), "ether")
                 const balance = await ethers.provider.getBalance(addressList[i])
                 const count = await ethers.provider.getTransactionCount(addressList[i])
                 if (ethValue.sub(balance).lte(0)) {
@@ -51,12 +51,11 @@ describe("deposit", function () {
         const recipients = signers.map((item) => {
             return item.address;
         })
-        await deposit(recipients, 100)
+        await deposit(recipients, 50)
     }).timeout(120000)
 })
 
 describe("withdraw", function () {
-    this.retries(2)
     it("withdraw", async function () {
         console.log(`withdraw from account${INITIALINDEX}`)
         const signers = await ethers.getSigners()
@@ -77,13 +76,11 @@ describe("withdraw", function () {
 })
 
 describe("check accounts balance", function () {
-    this.retries(2)
-    let signers, gasPrice, reply
+    let signers, reply
     before(async function () {
         this.timeout(60000);
         console.log(`check from account${INITIALINDEX}`)
         signers = await ethers.getSigners()
-        gasPrice = await getSufficientGasPrice(ethers.provider)
         const requestFnList = signers.map((signer) => () => ethers.provider.getBalance(signer.address))
         reply = await concurrentRun(requestFnList, 20, "查询所有账户余额");
     });
@@ -91,15 +88,17 @@ describe("check accounts balance", function () {
     it("checkAndDeposit", async function () {
         let recipients = []
         for (let i = 0; i < signers.length; i++) {
-            let balance = ethers.utils.formatEther(reply[i])
+            const balance = ethers.utils.formatEther(reply[i]);
+            if (balance < minAmount && (i + INITIALINDEX) % 100 === 0) {
+                console.error(`account${i + INITIALINDEX} ${signers[i].address} has insufficient balance: ${balance} eth < ${minAmount} eth`);
+            }
             if (balance < minAmount) {
-                console.error(`account${i + INITIALINDEX} ${signers[i].address} has insufficient balance: ${balance} eth < ${minAmount} eth`)
-                recipients.push(signers[i].address)
+                recipients.push(signers[i].address);
             }
         }
-        console.log(`${recipients.length} accounts with insufficient balance`)
         if (recipients.length > 0) {
-            await deposit(recipients, 100)
+            await deposit(recipients, 50)
+            console.log(`${recipients.length} accounts with insufficient balance`)
         }
     }).timeout(120000)
 
@@ -119,6 +118,7 @@ describe("check accounts balance", function () {
 
     it("afterWithdraw", async function () {
         let j = 0
+        let gasPrice = await getSufficientGasPrice(ethers.provider)
         for (let i = 0; i < signers.length; i++) {
             let balance = ethers.utils.formatEther(reply[i])
             let value = reply[i].sub(ethers.BigNumber.from(21000).mul(gasPrice)).toHexString().replaceAll("0x0", "0x")
@@ -159,6 +159,7 @@ async function deposit(recipients, recipientSize) {
                 value: ethers.utils.parseEther((remainingNum * depositAmount).toString())
             });
         await tx.wait();
+        console.log("txHash:", tx.hash);
     }
 }
 
@@ -233,34 +234,43 @@ async function getSufficientGasPrice(provider) {
  */
 async function concurrentRun(fnList = [], max = 5, taskName = "未命名") {
     if (!fnList.length) return;
-    // console.log(`开始执行多个异步任务，最大并发数： ${max}`);
+
     const replyList = []; // 收集任务执行结果
-    // const count = fnList.length; // 总任务数量
-    // const startTime = new Date().getTime(); // 记录任务执行开始时间
-    // let current = 0;
-    // 任务执行程序
-    const schedule = async (index) => {
-        return new Promise(async (resolve) => {
+    const maxRetry = 3; // 设置最大重试次数
+
+    const schedule = async (index, retryCount = 0) => {
+        return new Promise(async (resolve, reject) => {
             const fn = fnList[index];
             if (!fn) return resolve();
-            // 执行当前异步任务
-            replyList[index] = await fn();
-            // console.log(`${taskName} 事务进度 ${((++current / count) * 100).toFixed(2)}% `);
-            // 执行完当前任务后，继续执行任务池的剩余任务
-            await schedule(index + max);
-            resolve();
+            try {
+                // 执行当前异步任务
+                replyList[index] = await fn();
+                // 执行完当前任务后，继续执行任务池的剩余任务
+                await schedule(index + max);
+                resolve();
+            } catch (error) {
+                if (retryCount < maxRetry) {
+                    console.log(`Task ${index} failed, retrying... Retry count: ${retryCount + 1}`);
+                    await schedule(index, retryCount + 1);
+                    resolve();
+                } else {
+                    console.error(`Task ${index} failed after ${maxRetry} attempts`);
+                    reject(error);
+                }
+            }
         });
     };
+
     // 任务池执行程序
     const scheduleList = new Array(max)
         .fill(0)
         .map((_, index) => schedule(index));
     // 使用 Promise.all 批量执行
     await Promise.all(scheduleList);
-    // const cost = (new Date().getTime() - startTime) / 1000;
-    // console.log(`执行完成，最大并发数： ${max}，耗时：${cost}s`);
+
     return replyList;
 }
+
 
 module.exports = {
     concurrentRun,
