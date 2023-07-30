@@ -5,7 +5,7 @@ describe("transfer", function () {
     it("transfer demo", async () => {
         const signers = await ethers.getSigners();
         const from = signers[0].address;
-        const to = "0x3499932d7a1D1850253d6c66d830e3524bb3F2a7";
+        const to = "0x131Fa778Ae938C12f9Ffb62236e51D8B5d4055Ba";
         const ethValue = "0.01";
         const value = ethers.utils.parseUnits(ethValue, "ether").toHexString().replaceAll("0x0", "0x");
         await transfer(from, to, value);

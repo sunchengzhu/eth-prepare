@@ -23,6 +23,7 @@ npx hardhat compile
 ```dotenv
 MNEMONIC='test test test test test test test test test test test junk'
 COUNT=500
+INITIALINDEX=0
 ACCOUNTSNUM=10000
 DEPOSITAMOUNT=0.2
 MINAMOUNT=0.01
@@ -52,6 +53,7 @@ bash run.sh afterDeposit $NETWORK
 3. 定时检查并转账ETH
 
 这批账户用了一段时间后执行`checkAndDeposit`，保证所有账户的余额大于`MINAMOUNT`个ETH
+
 ```shell
 bash run.sh checkAndDeposit $NETWORK
 ```
@@ -81,9 +83,12 @@ npm run addRpcLog
 #若需要关闭rpc日志功能，则执行以下命令
 rm -rf node_modules/hardhat && npm install hardhat && chmod +x node_modules/.bin/hardhat
 ```
+
 ### 调整进程数
+
 可以修改run.sh中的`processNum`调整进程数
 
 ### 合约代码
+
 [UniswapV2Router02](https://sepolia.etherscan.io/address/0xcffdb3456e959b1b9dfd70534ee94e3cd48431be#code)  
 [SimpleStorage](https://sepolia.etherscan.io/address/0x47f45bb0bd0087d355d4c314eb55ffb10b64bad1#code)
