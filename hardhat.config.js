@@ -34,6 +34,14 @@ module.exports = {
             },
             gas: 10000000
         },
+        forcerelay_devnet: {
+            url: "http://54.238.73.76:8000",
+            accounts: {
+                mnemonic: MNEMONIC,
+                initialIndex: INITIALINDEX,
+                count: COUNT
+            }
+        },
         sepolia: {
             url: "https://eth-sepolia.g.alchemy.com/v2/jBG_4O1H5CHQugJjwBt_md0ks3FQpsqN",
             accounts: {
