@@ -3,7 +3,7 @@ const {execSync} = require('child_process');
 const fs = require("fs");
 
 describe('uniswap', function () {
-    this.timeout(100000)
+    this.timeout(120000)
     it('deployAndSwap', async () => {
         let deployInfo = {
             wethAddress: "",
@@ -79,6 +79,24 @@ describe('uniswap', function () {
             {value: 1000}
         )
         await swapTx.wait()
+    })
+
+    it('swap', async () => {
+        const uniAddress = '0x32308929C30b604836ed2243c25432F7df8bBb85'
+        const wethAddress = '0x7C2F5B5d7d3AAb0e917e06b0109CeE394d1a0d2e'
+        const otherTokenAddress = '0x9213ea93C4e6a6A8fC5B77fF1A169F65D509F50f'
+        const toAddress = '0x9DD3c285F8c253fB6327549E46f82E3DEdf59E34'
+        const UniswapV2Router02ContractInfo = await ethers.getContractFactory("UniswapV2Router02");
+        const uniswapV2Router02Contract = await UniswapV2Router02ContractInfo.attach(uniAddress)
+        const swapTx = await uniswapV2Router02Contract.swapExactETHForTokens(
+            1,
+            [wethAddress, otherTokenAddress],
+            toAddress,
+            99999999999999n,
+            {value: 1000}
+        )
+        await swapTx.wait()
+        console.log(`txHash: ${swapTx.hash}`);
         console.log(`data: ${swapTx.data}`)
     })
 });
