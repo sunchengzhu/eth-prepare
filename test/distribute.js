@@ -13,8 +13,8 @@ if (hre.network.name === "gw_testnet_v1") {
     contractAddress = "0x9e593da2fb96abf2bd5483e7fc417508df6ea40e"
 } else if (hre.network.name === "gw_alphanet_v1") {
     contractAddress = "0x3F83d35De751C6CaF49665235590F5f4C4Db97dD"
-} else if (hre.network.name === "axon_devnet") {
-    contractAddress = "0xA6465996d9b1C6E82a65d4503D07eE1F68ED3a34"
+} else if (hre.network.name === "axon_alphanet") {
+    contractAddress = "0x5803fc561C7ED57B5b55aBCFF67726BFb086c548"
 }
 
 describe("recharge", async function () {
@@ -24,7 +24,7 @@ describe("recharge", async function () {
         const addressList = await getAddressList(accountsNum, interval, MNEMONIC)
         if (addressList.length > 1) {
             for (let i = 1; i < addressList.length; i++) {
-                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 3).toString(), "ether")
+                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 1.1).toString(), "ether")
                 const balance = await ethers.provider.getBalance(addressList[i])
                 const count = await ethers.provider.getTransactionCount(addressList[i])
                 if (ethValue.sub(balance).lte(0)) {
