@@ -15,6 +15,8 @@ if (hre.network.name === "gw_testnet_v1") {
     contractAddress = "0x3F83d35De751C6CaF49665235590F5f4C4Db97dD"
 } else if (hre.network.name === "axon_alphanet") {
     contractAddress = "0x5803fc561C7ED57B5b55aBCFF67726BFb086c548"
+} else if (hre.network.name === "fantom_testnet") {
+    contractAddress = "0xbcab4f17Cf6Ea56326c4A910b2a13CbaD9B0fc73"
 }
 
 describe("recharge", async function () {
