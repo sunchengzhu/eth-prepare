@@ -82,10 +82,10 @@ describe('uniswap', function () {
     })
 
     it('swap', async () => {
-        const uniAddress = '0x32308929C30b604836ed2243c25432F7df8bBb85'
-        const wethAddress = '0x7C2F5B5d7d3AAb0e917e06b0109CeE394d1a0d2e'
-        const otherTokenAddress = '0x9213ea93C4e6a6A8fC5B77fF1A169F65D509F50f'
-        const toAddress = '0x9DD3c285F8c253fB6327549E46f82E3DEdf59E34'
+        const uniAddress = '0x7C7087d81c5f4Bd7EA30A5e13095414395DfD4F1'
+        const wethAddress = '0xA6465996d9b1C6E82a65d4503D07eE1F68ED3a34'
+        const otherTokenAddress = '0xA37614c751F37cBc54C5223254e8695024fA36c7'
+        const toAddress = '0x79026E949Ba3Ef5c854186244d1597a369Bc326D'
         const UniswapV2Router02ContractInfo = await ethers.getContractFactory("UniswapV2Router02");
         const uniswapV2Router02Contract = await UniswapV2Router02ContractInfo.attach(uniAddress)
         const swapTx = await uniswapV2Router02Contract.swapExactETHForTokens(
