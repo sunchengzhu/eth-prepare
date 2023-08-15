@@ -79,6 +79,7 @@ describe('uniswap', function () {
             {value: 1000}
         )
         await swapTx.wait()
+        console.log(`data: ${swapTx.data}`)
     })
 
     it('swap', async () => {
