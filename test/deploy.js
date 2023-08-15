@@ -15,5 +15,7 @@ describe("deploy", function () {
         console.log("simpleStorage address:", simpleStorage.address);
         const value = await simpleStorage.getValue();
         console.log(value)
+        const tx = await simpleStorage.populateTransaction.getValue();
+        console.log("tx data:", tx.data);
     }).timeout(60000)
 })
