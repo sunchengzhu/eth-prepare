@@ -68,10 +68,8 @@ bash run.sh checkAndDeposit $NETWORK
 bash run.sh withdraw $NETWORK
 ```
 
-bash run.sh afterWithdraw $NETWORK
-
 ```shell
-bash run.sh withdraw $NETWORK
+bash run.sh afterWithdraw $NETWORK
 ```
 
 ### 启用rpc日志功能

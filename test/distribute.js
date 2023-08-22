@@ -21,28 +21,27 @@ if (hre.network.name === "gw_testnet_v1") {
 
 describe("recharge", async function () {
     it("recharge", async function () {
-        const gasPrice = await getSufficientGasPrice(ethers.provider)
+        const gasPrice = await getSufficientGasPrice()
         const signers = await ethers.getSigners()
         const addressList = await getAddressList(accountsNum, interval, MNEMONIC)
         if (addressList.length > 1) {
             for (let i = 1; i < addressList.length; i++) {
-                const ethValue = ethers.utils.parseUnits((depositAmount * COUNT * 1.1).toString(), "ether")
+                const ethValue = ethers.parseUnits((depositAmount * COUNT * 1.1).toString(), "ether")
                 const balance = await ethers.provider.getBalance(addressList[i])
                 const count = await ethers.provider.getTransactionCount(addressList[i])
-                if (ethValue.sub(balance).lte(0)) {
-                    console.log(`account${i * interval + Number(process.env.INITIALINDEX)} ${addressList[i]} has sufficient balance: ${ethers.utils.formatEther(balance)} eth >= ${ethers.utils.formatEther(ethValue)} eth,nonce: ${count}`)
+                if ((balance - ethValue) >= BigInt(0)) {
+                    console.log(`account${i * interval + Number(process.env.INITIALINDEX)} ${addressList[i]} has sufficient balance: ${ethers.formatEther(balance)} eth >= ${ethers.formatEther(ethValue)} eth,nonce: ${count}`)
                 } else {
-                    let valueHex = ethValue.sub(balance).toHexString();
-                    let value = valueHex.startsWith("0x0") ? "0x" + valueHex.slice(3) : valueHex;
+                    const value = "0x" + (ethValue - balance).toString(16)
                     await transferWithReceipt(signers[0].address, addressList[i], gasPrice, value);
                     const newBalance = await ethers.provider.getBalance(addressList[i])
-                    console.log(`account${i * interval + Number(process.env.INITIALINDEX)} ${addressList[i]} balance: ${ethers.utils.formatEther(newBalance)} eth,nonce: ${count}`)
+                    console.log(`account${i * interval + Number(process.env.INITIALINDEX)} ${addressList[i]} balance: ${ethers.formatEther(newBalance)} eth,nonce: ${count}`)
                 }
             }
         }
         const balance = await ethers.provider.getBalance(addressList[0])
         const count = await ethers.provider.getTransactionCount(addressList[0])
-        console.log(`account0 ${addressList[0]} balance: ${ethers.utils.formatEther(balance)} eth,nonce: ${count}`)
+        console.log(`account${INITIALINDEX} ${addressList[0]} balance: ${ethers.formatEther(balance)} eth,nonce: ${count}`)
     }).timeout(180000)
 })
 
@@ -61,17 +60,17 @@ describe("withdraw", function () {
     it("withdraw", async function () {
         console.log(`withdraw from account${INITIALINDEX}`)
         const signers = await ethers.getSigners()
-        const hdNode = ethers.utils.HDNode.fromMnemonic(MNEMONIC).derivePath("m/44'/60'/0'/0/0")
-        const gasPrice = await getSufficientGasPrice(ethers.provider)
+        const wallet = ethers.HDNodeWallet.fromPhrase(MNEMONIC, null, "m/44'/60'/0'/0/0")
+        const gasPrice = await getSufficientGasPrice()
         const requestFnList = signers.map((signer) => () => ethers.provider.getBalance(signer.address))
         const reply = await concurrentRun(requestFnList, 20, "查询所有账户余额")
         const requestFnList1 = signers.map((signer) => () => ethers.provider.getTransactionCount(signer.address))
         const reply1 = await concurrentRun(requestFnList1, 20, "查询所有账户nonce")
         for (let i = 0; i < COUNT; i++) {
-            let value = reply[i].sub(ethers.BigNumber.from(21000).mul(gasPrice)).toHexString().replaceAll("0x0", "0x")
-            if (ethers.utils.formatEther(value) > 0) {
-                let nonce = ethers.BigNumber.from(reply1[i]).toHexString().replaceAll("0x0", "0x")
-                await transfer(signers[i].address, hdNode.address, gasPrice, value, nonce)
+            let value = reply[i] - BigInt(21000) * BigInt(gasPrice)
+            if (value > 0) {
+                let nonce = "0x" + reply1[i].toString(16)
+                await transfer(signers[i].address, wallet.address, gasPrice, "0x" + value.toString(16), nonce)
             }
         }
     }).timeout(240000)
@@ -90,7 +89,7 @@ describe("check accounts balance", function () {
     it("checkAndDeposit", async function () {
         let recipients = []
         for (let i = 0; i < signers.length; i++) {
-            const balance = ethers.utils.formatEther(reply[i]);
+            const balance = ethers.formatEther(reply[i]);
             if (balance < minAmount && (i + INITIALINDEX) % 100 === 0) {
                 console.error(`account${i + INITIALINDEX} ${signers[i].address} has insufficient balance: ${balance} eth < ${minAmount} eth`);
             }
@@ -107,7 +106,7 @@ describe("check accounts balance", function () {
     it("afterDeposit", async function () {
         let j = 0
         for (let i = 0; i < signers.length; i++) {
-            let balance = ethers.utils.formatEther(reply[i])
+            let balance = ethers.formatEther(reply[i])
             if (balance < depositAmount) {
                 console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth < ${depositAmount} eth`)
             } else {
@@ -120,12 +119,12 @@ describe("check accounts balance", function () {
 
     it("afterWithdraw", async function () {
         let j = 0
-        let gasPrice = await getSufficientGasPrice(ethers.provider)
+        let gasPrice = await getSufficientGasPrice()
         for (let i = 0; i < signers.length; i++) {
-            let balance = ethers.utils.formatEther(reply[i])
-            let value = reply[i].sub(ethers.BigNumber.from(21000).mul(gasPrice)).toHexString().replaceAll("0x0", "0x")
-            if (INITIALINDEX !== 0 && ethers.utils.formatEther(value) > 0) {
-                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth > ${ethers.utils.formatEther(ethers.BigNumber.from(21000).mul(gasPrice))} eth`)
+            let balance = ethers.formatEther(reply[i])
+            let value = reply[i] - BigInt(21000) * BigInt(gasPrice)
+            if (INITIALINDEX !== 0 && value > 0) {
+                console.error(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth > ${ethers.formatEther(BigInt(21000) * BigInt(gasPrice))} eth`)
             } else {
                 // console.log(`account${i + INITIALINDEX} ${signers[i].address} balance: ${balance} eth`)
                 j++
@@ -144,9 +143,9 @@ async function deposit(recipients, recipientSize) {
         for (let k = j * recipientSize; k < (j + 1) * recipientSize; k++) {
             tmpRecipients.push(recipients[k])
         }
-        const tx = await batchTransfer.transfer(tmpRecipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
+        const tx = await batchTransfer.getFunction("transfer").send(tmpRecipients, ethers.parseUnits(depositAmount.toString(), "ether"),
             {
-                value: ethers.utils.parseEther((recipientSize * depositAmount).toString())
+                value: ethers.parseEther((recipientSize * depositAmount).toString())
             });
         await tx.wait();
     }
@@ -156,9 +155,9 @@ async function deposit(recipients, recipientSize) {
         remainingRecipients.push(recipients[m])
     }
     if (remainingRecipients.length > 0) {
-        const tx = await batchTransfer.transfer(remainingRecipients, ethers.utils.parseUnits(depositAmount.toString(), "ether"),
+        const tx = await batchTransfer.getFunction("transfer").send(remainingRecipients, ethers.parseUnits(depositAmount.toString(), "ether"),
             {
-                value: ethers.utils.parseEther((remainingNum * depositAmount).toString())
+                value: ethers.parseEther((remainingNum * depositAmount).toString())
             });
         await tx.wait();
         console.log("txHash:", tx.hash);
@@ -166,12 +165,12 @@ async function deposit(recipients, recipientSize) {
 }
 
 async function getAddressList(accountsNum, interval, mnemonic) {
-    const hdNode = ethers.utils.HDNode.fromMnemonic(mnemonic)
+    const wallet = ethers.HDNodeWallet.fromPhrase(mnemonic, null, "m");
     let addressList = []
     const loopCount = Math.ceil(accountsNum / interval)
     for (let i = 0; i < loopCount; i++) {
         let sum = i * interval + Number(process.env.INITIALINDEX)
-        let hdNodeNew = hdNode.derivePath("m/44'/60'/0'/0/" + sum)
+        let hdNodeNew = wallet.derivePath("m/44'/60'/0'/0/" + sum)
         addressList.push(hdNodeNew.address)
     }
     return addressList
@@ -199,33 +198,29 @@ async function transfer(from, to, gasPrice, value, nonce) {
     }])
 }
 
-async function getTxReceipt(provider, txHash, count) {
-    let response
-    for (let i = 0; i < count; i++) {
-        response = await provider.getTransactionReceipt(txHash)
-        if (response == null) {
-            await sleep(2000)
-            continue
+async function getTxReceipt(provider, txHash, attempts) {
+    for (let i = 0; i < attempts; i++) {
+        const receipt = await provider.getTransactionReceipt(txHash);
+        if (receipt !== null) {
+            return receipt;
         }
-        if (response.confirmations >= 1) {
-            return response
-        }
-        await sleep(2000)
+        await sleep(1000);
     }
-    return response
+    return null;
 }
+
 
 async function sleep(timeOut) {
     await new Promise(r => setTimeout(r, timeOut));
 }
 
-async function getSufficientGasPrice(provider) {
-    const gasPrice = await provider.getGasPrice()
+async function getSufficientGasPrice() {
+    const gasPrice = (await ethers.provider.getFeeData()).gasPrice
     console.log(`gas price: ${gasPrice} wei`)
-    const myGasPrice = new BigNumber(gasPrice.toNumber()).multipliedBy(1.2).decimalPlaces(0)
+    // Multiply by 1.2 and round
+    const myGasPrice = (gasPrice * BigInt(12) + BigInt(5)) / BigInt(10)
     console.log(`my gas price: ${myGasPrice} wei`)
-    const hexPrice = ethers.BigNumber.from(myGasPrice.toNumber()).toHexString().replaceAll("0x0", "0x")
-    return hexPrice
+    return "0x" + myGasPrice.toString(16)
 }
 
 /**

@@ -9,14 +9,13 @@ describe("sendTransaction", function () {
         const signers = await ethers.getSigners();
         const from = signers[0].address;
         const ethValue = "3";
-        const value = ethers.utils.parseUnits(ethValue, "ether").toHexString().replaceAll("0x0", "0x");
+        const value = "0x" + ethers.parseUnits(ethValue, "ether").toString(16);
         await sendTransaction(from, to, value, data);
     }).timeout(60000)
 })
 
 async function sendTransaction(from, to, value, data) {
-    const getPrice = await ethers.provider.getGasPrice();
-    const gasPrice = getPrice.toHexString().replaceAll("0x0", "0x");
+    const gasPrice = "0x" + (await ethers.provider.getFeeData()).gasPrice.toString(16);
     const gas = await ethers.provider.send("eth_estimateGas", [{
         from,
         to,
