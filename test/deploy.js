@@ -15,7 +15,7 @@ describe("deploy", function () {
         await simpleStorage.waitForDeployment();
         const address = await simpleStorage.getAddress();
         console.log("simpleStorage address:", address);
-        const value = await simpleStorage.getFunction("getValue").call(null);
+        const value = await simpleStorage.getFunction("getValue").call();
         console.log("value:", value)
         const populateTx = await simpleStorage.getFunction("getValue").populateTransaction();
         console.log("tx data:", populateTx.data);
