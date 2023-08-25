@@ -16,6 +16,8 @@ describe("deploy", function () {
     const address = await simpleStorage.getAddress();
     console.log("simpleStorage address:", address);
     const randomNum = Math.floor(Math.random() * 1000000);
+    const estimateGas = await simpleStorage.getFunction("setValue").estimateGas(randomNum);
+    console.log("estimateGas:", estimateGas)
     const tx = await simpleStorage.getFunction("setValue").send(randomNum);
     const receipt = await tx.wait();
     console.log("txHash:", receipt.hash)
