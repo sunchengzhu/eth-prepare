@@ -1,4 +1,4 @@
-# distributeETH
+# eth-prepare
 
 从助记词生成的第一个账户分发ETH到助记词生成的n个账户
 
