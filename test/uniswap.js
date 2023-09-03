@@ -15,19 +15,19 @@ describe('uniswap', function () {
         // deploy weth9
         const ethContractInfo = await ethers.getContractFactory("WETH9");
         const wethContract = await ethContractInfo.deploy()
-        deployInfo.wethAddress = (await wethContract.deployed()).address
+        deployInfo.wethAddress = await (await wethContract.waitForDeployment()).getAddress()
 
         // deploy factory contract
         console.log('deploy factory contract')
         const factoryContractInfo = await ethers.getContractFactory("UniswapV2Factory");
         const factoryContract = await factoryContractInfo.deploy(deployInfo.wethAddress);
-        await factoryContract.deployed()
-        deployInfo.factoryAddress = factoryContract.address
+        await factoryContract.waitForDeployment()
+        deployInfo.factoryAddress = await factoryContract.getAddress()
         console.log('deployInfo.factoryAddress :', deployInfo.factoryAddress)
 
         // deploy swap contract
         console.log('deploy swap')
-        deployInfo.pairHash = await factoryContract.getPairCodeHash()
+        deployInfo.pairHash = await factoryContract.getFunction("getPairCodeHash").staticCall()
         console.log("deployInfo.pairHash:", deployInfo.pairHash)
         const pairHash = deployInfo.pairHash.replace("0x", "")
         const readData = fs.readFileSync('contracts/uniswap/UniswapV2Router02.sol')
@@ -38,31 +38,37 @@ describe('uniswap', function () {
         console.log(output)
         const UniswapV2Router02ContractInfo = await ethers.getContractFactory("UniswapV2Router02");
         const uniswapV2Router02Contract = await UniswapV2Router02ContractInfo.deploy(deployInfo.factoryAddress, deployInfo.wethAddress)
-        await uniswapV2Router02Contract.deployed()
-        deployInfo.uniAddress = uniswapV2Router02Contract.address
+        await uniswapV2Router02Contract.waitForDeployment()
+        deployInfo.uniAddress = await uniswapV2Router02Contract.getAddress()
 
         // deploy erc20 token contract
         console.log('deploy erc20')
         const usdtInfoContract = await ethers.getContractFactory("ERC20");
         const usdtContract = await usdtInfoContract.deploy("Usdt", "usdt", 1000000000000000000000n);
-        await usdtContract.deployed()
-        deployInfo.otherTokenAddress = usdtContract.address
+        await usdtContract.waitForDeployment()
+        const usdtContractAddress = usdtContract.getAddress()
+        deployInfo.otherTokenAddress = usdtContract.getAddress()
 
         console.log('approve')
         // apporve
-        const tx = await usdtContract.approve(uniswapV2Router02Contract.address, 1000000000000000000000n)
+        const tx = await usdtContract.getFunction("approve").send(deployInfo.uniAddress, 1000000000000000000000n)
         await tx.wait()
+
+        const signers = await ethers.getSigners();
 
         console.log('addliquity')
         // addliquity
-        let rt = await uniswapV2Router02Contract.addLiquidityETH(
-            usdtContract.address,
+        let rt = await uniswapV2Router02Contract.getFunction("addLiquidityETH").send(
+            usdtContractAddress,
             100000000000000000n,
             1,
             1,
-            uniswapV2Router02Contract.signer.address,
+            signers[0].address,
             99999999999999n,
-            {value: 1000000000}
+            {
+                value: 1000000000,
+                gasLimit: 10000000
+            }
         );
         await rt.wait();
 
@@ -71,12 +77,15 @@ describe('uniswap', function () {
         console.log(deployInfo)
 
         //swapExactETHForTokens
-        const swapTx = await uniswapV2Router02Contract.swapExactETHForTokens(
+        const swapTx = await uniswapV2Router02Contract.getFunction("swapExactETHForTokens").send(
             1,
             [deployInfo.wethAddress, deployInfo.otherTokenAddress],
-            uniswapV2Router02Contract.signer.address,
+            signers[1].address,
             99999999999999n,
-            {value: 1000}
+            {
+                value: 1000,
+                gasLimit: 300000
+            }
         )
         await swapTx.wait()
         console.log(`data: ${swapTx.data}`)
@@ -89,7 +98,7 @@ describe('uniswap', function () {
         const toAddress = '0x79026E949Ba3Ef5c854186244d1597a369Bc326D'
         const UniswapV2Router02ContractInfo = await ethers.getContractFactory("UniswapV2Router02");
         const uniswapV2Router02Contract = await UniswapV2Router02ContractInfo.attach(uniAddress)
-        const swapTx = await uniswapV2Router02Contract.swapExactETHForTokens(
+        const swapTx = await uniswapV2Router02Contract.getFunction("swapExactETHForTokens").send(
             1,
             [wethAddress, otherTokenAddress],
             toAddress,

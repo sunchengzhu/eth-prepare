@@ -31,8 +31,23 @@ module.exports = {
                 mnemonic: MNEMONIC,
                 initialIndex: INITIALINDEX,
                 count: COUNT
-            },
-            gas: 10000000
+            }
+        },
+        axon_single: {
+            url: "https://axon-debug.ckbapp.dev",
+            accounts: {
+                mnemonic: MNEMONIC,
+                initialIndex: INITIALINDEX,
+                count: COUNT
+            }
+        },
+        axon_beta_1: {
+            url: "https://axon-test.ckbapp.dev",
+            accounts: {
+                mnemonic: MNEMONIC,
+                initialIndex: INITIALINDEX,
+                count: COUNT
+            }
         },
         fantom_testnet: {
             url: "https://rpc.testnet.fantom.network",
