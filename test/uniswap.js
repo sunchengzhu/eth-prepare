@@ -77,6 +77,16 @@ describe('uniswap', function () {
     console.log(deployInfo)
 
     //swapExactETHForTokens
+    const estimatedGas = await uniswapV2Router02Contract.getFunction("swapExactETHForTokens").estimateGas(
+      1,
+      [deployInfo.wethAddress, deployInfo.otherTokenAddress],
+      signers[1].address,
+      99999999999999n,
+      {
+        value: 1000,
+      }
+    );
+
     const swapTx = await uniswapV2Router02Contract.getFunction("swapExactETHForTokens").send(
       1,
       [deployInfo.wethAddress, deployInfo.otherTokenAddress],
@@ -84,7 +94,7 @@ describe('uniswap', function () {
       99999999999999n,
       {
         value: 1000,
-        gasLimit: 300000
+        gasLimit: estimatedGas
       }
     )
     await swapTx.wait()
