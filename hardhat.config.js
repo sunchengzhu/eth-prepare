@@ -41,8 +41,8 @@ module.exports = {
                 count: COUNT
             }
         },
-        axon_beta_1: {
-            url: "https://axon-test.ckbapp.dev",
+        axon_local: {
+            url: "http://localhost:8000",
             accounts: {
                 mnemonic: MNEMONIC,
                 initialIndex: INITIALINDEX,
