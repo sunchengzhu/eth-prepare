@@ -103,10 +103,12 @@ describe('uniswap', function () {
   })
 
   it('swap', async () => {
-    const uniAddress = '0x7C7087d81c5f4Bd7EA30A5e13095414395DfD4F1'
-    const wethAddress = '0xA6465996d9b1C6E82a65d4503D07eE1F68ED3a34'
+    // https://sepolia.etherscan.io/address/0xcffdb3456e959b1b9dfd70534ee94e3cd48431be#code
+    const uniAddress = '0xcFFdb3456e959B1b9DFD70534EE94E3Cd48431be'
+    const wethAddress = '0x7C7087d81c5f4Bd7EA30A5e13095414395DfD4F1'
     const otherTokenAddress = '0xA37614c751F37cBc54C5223254e8695024fA36c7'
-    const toAddress = '0x79026E949Ba3Ef5c854186244d1597a369Bc326D'
+    const signers = await ethers.getSigners();
+    const toAddress = signers[1].address
     const UniswapV2Router02ContractInfo = await ethers.getContractFactory("UniswapV2Router02");
     const uniswapV2Router02Contract = await UniswapV2Router02ContractInfo.attach(uniAddress)
     const swapTx = await uniswapV2Router02Contract.getFunction("swapExactETHForTokens").send(
@@ -117,7 +119,7 @@ describe('uniswap', function () {
       { value: 1000 }
     )
     await swapTx.wait()
-    console.log(`txHash: ${swapTx.hash}`);
+    console.log(`swapTxHash: ${swapTx.hash}`);
     console.log(`data: ${swapTx.data}`)
   })
 });
