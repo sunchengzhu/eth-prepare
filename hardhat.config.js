@@ -49,6 +49,10 @@ module.exports = {
                 count: COUNT
             }
         },
+        axon_metadata: {
+            url: "http://localhost:8000",
+            accounts: ["37aa0f893d05914a4def0460c0a984d3611546cfb26924d7a7ca6e0db9950a2d"]
+        },
         fantom_testnet: {
             url: "https://rpc.testnet.fantom.network",
             accounts: {
