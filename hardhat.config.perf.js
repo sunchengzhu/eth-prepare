@@ -2,7 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require('dotenv').config()
 
 const MNEMONIC = process.env.MNEMONIC === undefined ? "test test test test test test test test test test test junk" : process.env.MNEMONIC
-const COUNT = 20
+const COUNT = process.env.COUNT === undefined ? 20 : parseInt(process.env.COUNT)
 const INITIALINDEX = process.env.INITIALINDEX === undefined ? 0 : parseInt(process.env.INITIALINDEX)
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -68,9 +68,9 @@ module.exports = {
   },
   solidity: {
     compilers: [
-      { version: "0.8.18" },
-      { version: "0.6.6", settings: { optimizer: { enabled: true, runs: 200 } } },
-      { version: "0.5.16" }
+      {version: "0.8.18"},
+      {version: "0.6.6", settings: {optimizer: {enabled: true, runs: 200}}},
+      {version: "0.5.16"}
     ]
   },
   MNEMONIC,
