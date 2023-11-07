@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat")
 const BigNumber = require('bignumber.js');
-const { COUNT, INITIALINDEX, MNEMONIC } = require("../hardhat.config");
+const { COUNT, INITIALINDEX, MNEMONIC } = require("../hardhat.config.perf");
 const { expect } = require("chai");
 const hre = require("hardhat");
 
@@ -14,7 +14,7 @@ if (hre.network.name === "gw_testnet_v1") {
 } else if (hre.network.name === "gw_alphanet_v1") {
   contractAddress = "0x3F83d35De751C6CaF49665235590F5f4C4Db97dD"
 } else if (hre.network.name === "axon_alphanet") {
-  contractAddress = "0x5803fc561C7ED57B5b55aBCFF67726BFb086c548"
+  contractAddress = "0x3abBB0D6ad848d64c8956edC9Bf6f18aC22E1485"
 } else if (hre.network.name === "fantom_testnet") {
   contractAddress = "0xbcab4f17Cf6Ea56326c4A910b2a13CbaD9B0fc73"
 }
